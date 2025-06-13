@@ -15,6 +15,19 @@ app.use(express.json());
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
+    // Validação dos campos
+    if (typeof amount !== 'number' || isNaN(amount)) {
+        return res.status(400).json({ error: "Campo 'amount' é obrigatório e deve ser um número válido." });
+    }
+
+    if (!description || typeof description !== 'string') {
+        return res.status(400).json({ error: "Campo 'description' é obrigatório" });
+    }
+
+    if (!reference || typeof reference !== 'string') {
+        return res.status(400).json({ error: "Campo 'reference' é obrigatório" });
+    }
+
     try {
         const data = new URLSearchParams({
             email: process.env.PAGSEGURO_EMAIL,
@@ -22,18 +35,20 @@ app.post('/api/pix', async (req, res) => {
             payment_method_id: 'pix',
             item_description_1: description,
             item_quantity_1: '1',
-            item_amount_1: amount.toFixed(2),
+            item_amount_1: amount.toFixed(2), // Agora é seguro usar toFixed
             reference
         });
 
-        const response = await axios.post('https://ws.pagseguro.uol.com.br/v2/transactions',  data.toString(), {
+        const url = 'https://ws.pagseguro.uol.com.br/v2/transactions'; 
+
+        const axiosResponse = await axios.post(url, data.toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
 
         const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
+        const xml = parser.parseFromString(axiosResponse.data, 'text/xml');
 
         const qrCode = xml.querySelector('qrCode')?.textContent || null;
         const copyPaste = xml.querySelector('copyAndPaste')?.textContent || null;
@@ -49,12 +64,7 @@ app.post('/api/pix', async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error.response?.data || error.message);
+        console.error("Erro na API do PagSeguro:", error.message);
         res.status(500).json({ error: 'Erro ao gerar PIX' });
     }
-});
-
-// Iniciar servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
 });
