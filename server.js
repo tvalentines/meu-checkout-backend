@@ -4,8 +4,11 @@ const cors = require('cors');
 const axios = require('axios');
 const { DOMParser } = require('xmldom');
 
-const app = express(); // AQUI ESTÁ O QUE FALTAVA!
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 // Middlewares
 app.use(cors());
