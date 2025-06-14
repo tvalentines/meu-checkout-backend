@@ -14,19 +14,18 @@ app.use(cors());
 app.use(express.json());
 
 // Rota simples pra teste
-app.get('/', (req, res) => {
-    res.json({ status: 'Servidor funcionando!' });
-});
-
-// Rota para gerar PIX
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
-    // Validação melhorada
-    const parsedAmount = parseFloat(amount);
+    // Validação mais robusta
+    let parsedAmount = parseFloat(amount);
+
     if (isNaN(parsedAmount) || typeof parsedAmount !== 'number') {
+        console.error("Valor recebido:", amount);
         return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
+
+    parsedAmount = parseFloat(parsedAmount.toFixed(2)); // Garantir 2 casas decimais
 
     try {
         const data = new URLSearchParams({
@@ -67,12 +66,4 @@ app.post('/api/pix', async (req, res) => {
         console.error("Erro na API do PagSeguro:", error.message);
         res.status(500).json({ error: 'Erro ao gerar PIX' });
     }
-});
-
-// Porta do servidor
-const PORT = process.env.PORT || 3000;
-
-// ✅ Servidor escutando
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
 });
