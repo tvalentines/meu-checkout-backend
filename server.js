@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference, name, email, cpf, phone, street, number, district, city, state, postalCode } = req.body;
 
-    // Validação inicial
+    // Validação do amount
     if (typeof amount !== 'number' || isNaN(amount)) {
         return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
@@ -38,29 +38,24 @@ app.post('/api/pix', async (req, res) => {
             item_amount_1: amount.toFixed(2),
             reference: reference || `pedido_${Date.now()}`,
 
-            currency: 'BRL',
-
             // Dados do comprador
             sender_name: name || 'João da Silva',
             sender_email: email || 'comprador@example.com',
             sender_cpf: cpf || '12345678900',
             sender_area_code: phone?.slice(0, 2) || '11',
             sender_phone: phone?.slice(2) || '999999999',
-            sender_hash: '',
 
-            // Endereço de entrega
+            // Endereço de entrega (sempre requerido)
             shippingAddressRequired: 'true',
             shippingAddressStreet: street || 'Rua Principal',
             shippingAddressNumber: number || '123',
-            shippingAddressComplement: '',
             shippingAddressDistrict: district || 'Centro',
             shippingAddressCity: city || 'São Paulo',
             shippingAddressState: state || 'SP',
             shippingAddressPostalCode: postalCode || '01310000',
             shippingAddressCountry: 'BRA',
 
-            // Outros campos obrigatórios
-            notificationURL: 'https://seusite.com/webhook/pagseguro' 
+            currency: 'BRL'
         });
 
         const url = 'https://ws.pagseguro.uol.com.br/v2/transactions'; 
@@ -78,8 +73,8 @@ app.post('/api/pix', async (req, res) => {
         const copyPaste = xml.querySelector('copyAndPaste')?.textContent || null;
 
         if (!qrCode || !copyPaste) {
-            console.error("QR Code ou CopyPaste ausente");
-            return res.status(500).json({ error: "Falha ao gerar PIX" });
+            console.error("QR Code ou CopyPaste ausentes");
+            return res.status(500).json({ error: "Falha ao gerar PIX", raw_response: axiosResponse.data });
         }
 
         res.json({
@@ -92,7 +87,7 @@ app.post('/api/pix', async (req, res) => {
         console.error("Erro completo:", error.message);
         console.error("Resposta bruta do PagSeguro:", error.response?.data);
 
-        return res.status(500).json({
+        res.status(500).json({
             error: "Erro ao gerar PIX",
             raw_response: error.response?.data
         });

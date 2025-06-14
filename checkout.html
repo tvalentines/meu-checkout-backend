@@ -676,7 +676,7 @@
     const userPhone = document.getElementById('phone').value.replace(/\D/g, '');
     const userCpf = document.getElementById('cpf').value.replace(/\D/g, '');
     const cep = document.getElementById('addressCep').value.replace(/\D/g, '');
-    const estado = document.getElementById('state').value;
+    const estado = document.getElementById('state').value || document.getElementById('addressState').value;
     const cidade = document.getElementById('city').value;
     const bairro = document.getElementById('neighborhood').value;
     const endereco = document.getElementById('street').value;
