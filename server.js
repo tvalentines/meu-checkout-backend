@@ -22,15 +22,17 @@ app.get('/', (req, res) => {
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
-    // Validação mais robusta
-    let parsedAmount = parseFloat(amount);
+    console.log("Dados recebidos:", req.body); // Log para ver no Render
 
-    if (isNaN(parsedAmount) || typeof parsedAmount !== 'number') {
-        console.error("Valor recebido:", amount);
-        return res.status(400).json({ error: "Campo 'amount' inválido" });
+    // Validação robusta
+    if (typeof amount === 'undefined' || amount === null) {
+        return res.status(400).json({ error: "Campo 'amount' ausente" });
     }
 
-    parsedAmount = parseFloat(parsedAmount.toFixed(2)); // Garantir 2 casas decimais
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        return res.status(400).json({ error: "Campo 'amount' deve ser um número válido" });
+    }
 
     try {
         const data = new URLSearchParams({
