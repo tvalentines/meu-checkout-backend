@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 
 // CHECKOUT v3 - FUNCIONA COM TOKEN NORMAL
 app.post('/api/checkout-v3', async (req, res) => {
-    console.log('\n🚀 PAGSEGURO v3 - SEM WHITELIST');
+    console.log('\n🚀 PAGSEGURO v2/CHECKOUT - XML ESTRUTURADO');
     
     const { amount, name, email, cpf, phone, street, number, district, city, state, postalCode } = req.body;
 
@@ -109,9 +109,9 @@ app.post('/api/checkout-v3', async (req, res) => {
         console.log('=== XML ENVIADO ===');
         console.log(xmlData);
 
-        // Envia para PagSeguro v3 com XML
+        // Envia para PagSeguro v2 com XML (endpoint correto para checkout)
         const response = await axios.post(
-            'https://ws.pagseguro.uol.com.br/v3/transactions',
+            'https://ws.pagseguro.uol.com.br/v2/checkout',
             xmlData,
             {
                 params: {
@@ -125,7 +125,7 @@ app.post('/api/checkout-v3', async (req, res) => {
             }
         );
 
-        console.log('✅ Resposta PagSeguro v3:', response.data);
+        console.log('✅ Resposta PagSeguro v2/checkout:', response.data);
 
         // Parse da resposta XML
         const parser = new DOMParser();
@@ -143,28 +143,28 @@ app.post('/api/checkout-v3', async (req, res) => {
             throw new Error(errorMsg);
         }
 
-        // Extrai dados da transação
-        const transactionCode = xmlDoc.getElementsByTagName('code')[0]?.textContent;
-        const transactionDate = xmlDoc.getElementsByTagName('date')[0]?.textContent;
+        // Extrai código do checkout (não transação)
+        const checkoutCode = xmlDoc.getElementsByTagName('code')[0]?.textContent;
+        const checkoutDate = xmlDoc.getElementsByTagName('date')[0]?.textContent;
 
-        if (!transactionCode) {
-            throw new Error('Código da transação não encontrado');
+        if (!checkoutCode) {
+            throw new Error('Código do checkout não encontrado');
         }
 
-        const checkoutUrl = `https://pagseguro.uol.com.br/v2/checkout/payment.html?code=${transactionCode}`;
+        const checkoutUrl = `https://pagseguro.uol.com.br/v2/checkout/payment.html?code=${checkoutCode}`;
 
-        console.log('✅ Transação criada:', transactionCode);
+        console.log('✅ Checkout criado:', checkoutCode);
 
         res.json({
             success: true,
-            transaction_code: transactionCode,
-            transaction_date: transactionDate,
+            checkout_code: checkoutCode,
+            checkout_date: checkoutDate,
             redirect_url: checkoutUrl,
-            message: 'Checkout v3 criado com sucesso!'
+            message: 'Checkout XML criado com sucesso!'
         });
 
     } catch (error) {
-        console.error('❌ Erro v3:', error.response?.data || error.message);
+        console.log('❌ Erro v2/checkout:', error.response?.data || error.message);
         
         let errorMessage = 'Erro desconhecido';
         let suggestions = [];
@@ -306,17 +306,17 @@ app.get('/sucesso', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log('\n🚀 PAGSEGURO v3 HÍBRIDO ATIVO');
+    console.log('\n🚀 PAGSEGURO v2/XML HÍBRIDO ATIVO');
     console.log(`📍 Porta: ${PORT}`);
     console.log(`📧 Email: ${process.env.PAGSEGURO_EMAIL || '❌ FALTANDO'}`);
     console.log(`🔑 Token: ${process.env.PAGSEGURO_TOKEN ? '✅ OK' : '❌ FALTANDO'}`);
-    console.log('\n📋 VANTAGENS v3 HÍBRIDO:');
-    console.log('• ✅ Não precisa de whitelist');
-    console.log('• ✅ Usa token normal do PagSeguro');
-    console.log('• ✅ XML estruturado corretamente');
-    console.log('• ✅ Funciona imediatamente');
+    console.log('\n📋 VANTAGENS XML HÍBRIDO:');
+    console.log('• ✅ Endpoint /v2/checkout correto');
+    console.log('• ✅ XML estruturado como o PagSeguro espera');
+    console.log('• ✅ Dados limpos e validados');
+    console.log('• ✅ Sem problemas de endpoint');
     console.log('\n🔗 ENDPOINTS:');
-    console.log('• /api/checkout-v3 - Checkout completo');
-    console.log('• /api/pix-v3 - PIX direto');
+    console.log('• /api/checkout-v3 - Checkout XML');
+    console.log('• /api/pix-v3 - PIX via checkout');
     console.log('=====================================\n');
 });
