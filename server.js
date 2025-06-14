@@ -22,7 +22,9 @@ app.get('/', (req, res) => {
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
-    if (typeof amount !== 'number' || isNaN(amount)) {
+    // Validação melhorada
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || typeof parsedAmount !== 'number') {
         return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
 
@@ -33,20 +35,20 @@ app.post('/api/pix', async (req, res) => {
             payment_method_id: 'pix',
             item_description_1: description || 'Magic Germinator',
             item_quantity_1: '1',
-            item_amount_1: amount.toFixed(2),
+            item_amount_1: parsedAmount.toFixed(2),
             reference: reference || `pedido_${Date.now()}`
         });
 
         const url = 'https://ws.pagseguro.uol.com.br/v2/transactions'; 
 
-        const response = await axios.post(url, data.toString(), {
+        const axiosResponse = await axios.post(url, data.toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
 
         const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
+        const xml = parser.parseFromString(axiosResponse.data, 'text/xml');
 
         const qrCode = xml.querySelector('qrCode')?.textContent || null;
         const copyPaste = xml.querySelector('copyAndPaste')?.textContent || null;
