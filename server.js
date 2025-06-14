@@ -22,16 +22,9 @@ app.get('/', (req, res) => {
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
-    console.log("Dados recebidos:", req.body); // Log para ver no Render
-
-    // Validação robusta
-    if (typeof amount === 'undefined' || amount === null) {
-        return res.status(400).json({ error: "Campo 'amount' ausente" });
-    }
-
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        return res.status(400).json({ error: "Campo 'amount' deve ser um número válido" });
+    // Validação dos dados recebidos
+    if (typeof amount !== 'number' || isNaN(amount)) {
+        return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
 
     try {
@@ -41,8 +34,13 @@ app.post('/api/pix', async (req, res) => {
             payment_method_id: 'pix',
             item_description_1: description || 'Magic Germinator',
             item_quantity_1: '1',
-            item_amount_1: parsedAmount.toFixed(2),
-            reference: reference || `pedido_${Date.now()}`
+            item_amount_1: amount.toFixed(2),
+            reference: reference || `pedido_${Date.now()}`,
+            sender_email: 'comprador@example.com', // Email do comprador
+            sender_name: 'João da Silva',          // Nome do comprador
+            sender_cpf: '12345678900',           // CPF do comprador
+            sender_phone: '11999999999',          // Telefone
+            notificationURL: 'https://seusite.com/webhook/pagseguro' 
         });
 
         const url = 'https://ws.pagseguro.uol.com.br/v2/transactions'; 
@@ -60,6 +58,7 @@ app.post('/api/pix', async (req, res) => {
         const copyPaste = xml.querySelector('copyAndPaste')?.textContent || null;
 
         if (!qrCode || !copyPaste) {
+            console.error("Resposta do PagSeguro:", axiosResponse.data);
             return res.status(500).json({ error: 'Falha ao gerar PIX' });
         }
 
@@ -70,7 +69,15 @@ app.post('/api/pix', async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Erro na API do PagSeguro:", error.message);
+        console.error("Erro completo:", error.message);
+        console.error("Dados enviados:", {
+            email: process.env.PAGSEGURO_EMAIL,
+            amount,
+            description,
+            reference
+        });
+        console.error("Resposta bruta do PagSeguro:", error.response?.data);
+
         res.status(500).json({ error: 'Erro ao gerar PIX' });
     }
 });
