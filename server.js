@@ -20,9 +20,9 @@ app.get('/', (req, res) => {
 
 // Rota para gerar PIX
 app.post('/api/pix', async (req, res) => {
-    const { amount, description, reference } = req.body;
+    const { amount, description, reference, name, email, cpf, phone, street, number, district, city, state, postalCode } = req.body;
 
-    // Validação dos dados recebidos
+    // Validação inicial
     if (typeof amount !== 'number' || isNaN(amount)) {
         return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
@@ -31,15 +31,35 @@ app.post('/api/pix', async (req, res) => {
         const data = new URLSearchParams({
             email: process.env.PAGSEGURO_EMAIL,
             token: process.env.PAGSEGURO_TOKEN,
+
             payment_method_id: 'pix',
             item_description_1: description || 'Magic Germinator',
             item_quantity_1: '1',
             item_amount_1: amount.toFixed(2),
             reference: reference || `pedido_${Date.now()}`,
-            sender_email: 'comprador@example.com', // Email do comprador
-            sender_name: 'João da Silva',          // Nome do comprador
-            sender_cpf: '12345678900',           // CPF do comprador
-            sender_phone: '11999999999',          // Telefone
+
+            currency: 'BRL',
+
+            // Dados do comprador
+            sender_name: name || 'João da Silva',
+            sender_email: email || 'comprador@example.com',
+            sender_cpf: cpf || '12345678900',
+            sender_area_code: phone?.slice(0, 2) || '11',
+            sender_phone: phone?.slice(2) || '999999999',
+            sender_hash: '',
+
+            // Endereço de entrega
+            shippingAddressRequired: 'true',
+            shippingAddressStreet: street || 'Rua Principal',
+            shippingAddressNumber: number || '123',
+            shippingAddressComplement: '',
+            shippingAddressDistrict: district || 'Centro',
+            shippingAddressCity: city || 'São Paulo',
+            shippingAddressState: state || 'SP',
+            shippingAddressPostalCode: postalCode || '01310000',
+            shippingAddressCountry: 'BRA',
+
+            // Outros campos obrigatórios
             notificationURL: 'https://seusite.com/webhook/pagseguro' 
         });
 
@@ -58,8 +78,8 @@ app.post('/api/pix', async (req, res) => {
         const copyPaste = xml.querySelector('copyAndPaste')?.textContent || null;
 
         if (!qrCode || !copyPaste) {
-            console.error("Resposta do PagSeguro:", axiosResponse.data);
-            return res.status(500).json({ error: 'Falha ao gerar PIX' });
+            console.error("QR Code ou CopyPaste ausente");
+            return res.status(500).json({ error: "Falha ao gerar PIX" });
         }
 
         res.json({
@@ -70,15 +90,12 @@ app.post('/api/pix', async (req, res) => {
 
     } catch (error) {
         console.error("Erro completo:", error.message);
-        console.error("Dados enviados:", {
-            email: process.env.PAGSEGURO_EMAIL,
-            amount,
-            description,
-            reference
-        });
         console.error("Resposta bruta do PagSeguro:", error.response?.data);
 
-        res.status(500).json({ error: 'Erro ao gerar PIX' });
+        return res.status(500).json({
+            error: "Erro ao gerar PIX",
+            raw_response: error.response?.data
+        });
     }
 });
 
