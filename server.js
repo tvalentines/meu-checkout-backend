@@ -52,35 +52,69 @@ app.post('/api/pix', async (req, res) => {
         const areaCode = cleanPhone.slice(0, 2);
         const phoneNumber = cleanPhone.slice(2);
 
-        console.log('=== DADOS PROCESSADOS ===');
-        console.log(`Nome: ${name}`);
-        console.log(`Email: ${email}`);
-        console.log(`CPF: ${cleanCpf}`);
-        console.log(`DDD: ${areaCode} | Telefone: ${phoneNumber}`);
-        console.log(`Valor: R$ ${amount}`);
+        // Validação extra antes de enviar
+        if (cleanCpf.length !== 11) {
+            return res.status(400).json({ 
+                error: "CPF deve ter 11 dígitos", 
+                received: cleanCpf,
+                length: cleanCpf.length 
+            });
+        }
 
-        // Monta dados usando query string simples (método GET funcionaria?)
+        if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+            return res.status(400).json({ 
+                error: "Telefone deve ter 10 ou 11 dígitos", 
+                received: cleanPhone,
+                length: cleanPhone.length 
+            });
+        }
+
+        if (cleanCep && cleanCep.length !== 8) {
+            return res.status(400).json({ 
+                error: "CEP deve ter 8 dígitos", 
+                received: cleanCep,
+                length: cleanCep.length 
+            });
+        }
+
+        // Monta dados usando query string com TODOS os campos obrigatórios
         const params = new URLSearchParams({
+            // Credenciais
             email: process.env.PAGSEGURO_EMAIL,
             token: process.env.PAGSEGURO_TOKEN,
+            
+            // Configuração básica
             currency: 'BRL',
+            
+            // Item - com peso obrigatório
             itemId1: '0001',
             itemDescription1: description || 'Magic Germinator',
             itemAmount1: parseFloat(amount).toFixed(2),
             itemQuantity1: '1',
-            itemWeight1: '1000',
+            itemWeight1: '1000', // Peso obrigatório para shipping
+            
+            // Referência
             reference: reference || `MG${Date.now()}`,
+            
+            // Comprador - TODOS os campos obrigatórios
             senderName: name,
             senderEmail: email,
             senderCPF: cleanCpf,
             senderAreaCode: areaCode,
             senderPhone: phoneNumber,
+            
+            // Frete obrigatório
             shippingType: '3',
-            shippingCost: '0.00'
+            shippingCost: '0.00',
+            
+            // URLs importantes
+            redirectURL: 'https://meu-checkout-backend-1.onrender.com/sucesso',
+            notificationURL: 'https://meu-checkout-backend-1.onrender.com/api/notification'
         });
 
-        // Se tem endereço, adiciona
+        // Se tem endereço, adiciona TODOS os campos obrigatórios de endereço
         if (street && number && district && city && state) {
+            // Endereço de entrega (obrigatório quando há shipping)
             params.append('shippingAddressStreet', street);
             params.append('shippingAddressNumber', number);
             params.append('shippingAddressDistrict', district);
@@ -88,9 +122,60 @@ app.post('/api/pix', async (req, res) => {
             params.append('shippingAddressState', state.toUpperCase());
             params.append('shippingAddressCountry', 'BRA');
             params.append('shippingAddressPostalCode', cleanCep);
+            
+            // ADICIONANDO: Endereço de cobrança (OBRIGATÓRIO para evitar erro)
+            // O PagSeguro exige endereço de cobrança para checkout completo
+            params.append('senderAddressStreet', street);
+            params.append('senderAddressNumber', number);
+            params.append('senderAddressDistrict', district);
+            params.append('senderAddressCity', city);
+            params.append('senderAddressState', state.toUpperCase());
+            params.append('senderAddressCountry', 'BRA');
+            params.append('senderAddressPostalCode', cleanCep);
+        } else {
+            // Se não tem endereço completo, usa endereço padrão
+            console.log('⚠️  Endereço incompleto, usando endereço padrão...');
+            
+            // Endereço padrão que funciona
+            const defaultAddress = {
+                street: 'Av. Brig. Faria Lima',
+                number: '1384',
+                district: 'Jardim Paulistano',
+                city: 'São Paulo',
+                state: 'SP',
+                postalCode: '01452002'
+            };
+            
+            // Endereço de entrega
+            params.append('shippingAddressStreet', defaultAddress.street);
+            params.append('shippingAddressNumber', defaultAddress.number);
+            params.append('shippingAddressDistrict', defaultAddress.district);
+            params.append('shippingAddressCity', defaultAddress.city);
+            params.append('shippingAddressState', defaultAddress.state);
+            params.append('shippingAddressCountry', 'BRA');
+            params.append('shippingAddressPostalCode', defaultAddress.postalCode);
+            
+            // Endereço de cobrança (mesmo endereço)
+            params.append('senderAddressStreet', defaultAddress.street);
+            params.append('senderAddressNumber', defaultAddress.number);
+            params.append('senderAddressDistrict', defaultAddress.district);
+            params.append('senderAddressCity', defaultAddress.city);
+            params.append('senderAddressState', defaultAddress.state);
+            params.append('senderAddressCountry', 'BRA');
+            params.append('senderAddressPostalCode', defaultAddress.postalCode);
         }
 
-        console.log('\n=== TENTATIVA 1: POST SIMPLES ===');
+        console.log('=== DADOS PROCESSADOS E VALIDADOS ===');
+        console.log(`Nome: ${name}`);
+        console.log(`Email: ${email}`);
+        console.log(`CPF: ${cleanCpf} (${cleanCpf.length} dígitos)`);
+        console.log(`DDD: ${areaCode} | Telefone: ${phoneNumber} (${cleanPhone.length} dígitos total)`);
+        console.log(`CEP: ${cleanCep} (${cleanCep.length} dígitos)`);
+        console.log(`Valor: R$ ${amount}`);
+        console.log(`Endereço: ${street || 'Usando padrão'}, ${number || 'N/A'} - ${district || 'N/A'}`);
+        console.log(`Cidade: ${city || 'São Paulo'}/${state || 'SP'}`);
+
+        console.log('\n=== TENTATIVA 1: POST COMPLETO ===');
         
         try {
             // Primeira tentativa: POST mais básico possível
