@@ -14,6 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 // Rota simples pra teste
+app.get('/', (req, res) => {
+    res.json({ status: 'Servidor funcionando!' });
+});
+
+// Rota para gerar PIX
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference } = req.body;
 
@@ -66,4 +71,12 @@ app.post('/api/pix', async (req, res) => {
         console.error("Erro na API do PagSeguro:", error.message);
         res.status(500).json({ error: 'Erro ao gerar PIX' });
     }
+});
+
+// Porta do servidor
+const PORT = process.env.PORT || 3000;
+
+// ✅ Servidor escutando
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
