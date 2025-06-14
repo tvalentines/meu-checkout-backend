@@ -13,8 +13,76 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.json({ 
         status: 'PagBank API v4 - FUNCIONANDO!',
-        message: 'Use /api/pagbank para checkout'
+        message: 'Use /api/pagbank para checkout',
+        endpoints: {
+            test: '/test-pagbank',
+            checkout: '/api/pagbank', 
+            pix: '/api/pix-direto'
+        },
+        token_configured: !!process.env.PAGBANK_TOKEN
     });
+});
+
+// Rota para testar token PagBank
+app.get('/test-pagbank', async (req, res) => {
+    console.log('\n🧪 TESTANDO TOKEN PAGBANK...');
+    
+    if (!process.env.PAGBANK_TOKEN) {
+        return res.status(400).json({
+            error: 'Token PagBank não configurado',
+            instruction: 'Configure PAGBANK_TOKEN no arquivo .env'
+        });
+    }
+    
+    try {
+        // Testa com uma requisição simples de webhook
+        const response = await axios.get(
+            'https://api.pagseguro.com/public-keys',
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.PAGBANK_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 15000
+            }
+        );
+        
+        console.log('✅ Token PagBank válido!');
+        
+        res.json({
+            success: true,
+            message: 'Token PagBank válido!',
+            token_preview: process.env.PAGBANK_TOKEN.substring(0, 20) + '...',
+            api_response: 'Conectado com sucesso'
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao testar token:', error.response?.data || error.message);
+        
+        let errorMsg = 'Token inválido';
+        let instructions = [];
+        
+        if (error.response?.status === 401) {
+            errorMsg = 'Token não autorizado';
+            instructions = [
+                '1. Verifique se o token está correto',
+                '2. Acesse: https://minhaconta.pagseguro.uol.com.br/',
+                '3. Vá em Preferências > Integrações',
+                '4. Gere um novo token para "vendas online"',
+                '5. Atualize PAGBANK_TOKEN no .env'
+            ];
+        } else if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+            errorMsg = 'Problema de conexão';
+            instructions = ['Verifique sua conexão com a internet'];
+        }
+        
+        res.status(500).json({
+            success: false,
+            error: errorMsg,
+            details: error.response?.data || error.message,
+            instructions: instructions
+        });
+    }
 });
 
 // NOVA API - PAGBANK v4 (funciona 100%)
@@ -113,7 +181,7 @@ app.post('/api/pagbank', async (req, res) => {
     }
 });
 
-// ROTA ALTERNATIVA - PIX DIRETO (sem checkout)
+// ROTA ALTERNATIVA - PIX DIRETO (sem checkout) - CORRIGIDA
 app.post('/api/pix-direto', async (req, res) => {
     console.log('\n💰 PIX DIRETO - SEM CHECKOUT');
     
@@ -123,7 +191,7 @@ app.post('/api/pix-direto', async (req, res) => {
         const cleanCpf = cpf.replace(/\D/g, '');
         const cleanPhone = phone.replace(/\D/g, '');
 
-        // Gera PIX direto
+        // Estrutura corrigida para PIX PagBank v4
         const pixData = {
             reference_id: `PIX_${Date.now()}`,
             description: "Magic Germinator Professional",
@@ -132,7 +200,10 @@ app.post('/api/pix-direto', async (req, res) => {
                 currency: "BRL"
             },
             payment_method: {
-                type: "PIX"
+                type: "PIX",
+                pix: {
+                    expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutos
+                }
             },
             customer: {
                 name: name,
@@ -143,8 +214,13 @@ app.post('/api/pix-direto', async (req, res) => {
                     area: cleanPhone.slice(0, 2),
                     number: cleanPhone.slice(2)
                 }
-            }
+            },
+            notification_urls: [
+                "https://meu-checkout-backend-1.onrender.com/api/webhook"
+            ]
         };
+
+        console.log('Enviando PIX para PagBank:', JSON.stringify(pixData, null, 2));
 
         const response = await axios.post(
             'https://api.pagseguro.com/charges',
@@ -153,7 +229,8 @@ app.post('/api/pix-direto', async (req, res) => {
                 headers: {
                     'Authorization': `Bearer ${process.env.PAGBANK_TOKEN}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                timeout: 30000
             }
         );
 
@@ -168,11 +245,27 @@ app.post('/api/pix-direto', async (req, res) => {
             qr_code: qrCode,
             pix_code: pixCode,
             amount: amount,
+            expiration: pixData.payment_method.pix.expiration_date,
             message: 'PIX gerado com sucesso!'
         });
 
     } catch (error) {
         console.error('❌ Erro PIX:', error.response?.data || error.message);
+        
+        // Se for erro de autenticação, mostra como corrigir
+        if (error.response?.status === 401) {
+            return res.status(401).json({
+                error: 'Token PagBank inválido',
+                details: 'Verifique se o PAGBANK_TOKEN está correto no .env',
+                how_to_fix: [
+                    '1. Acesse: https://minhaconta.pagseguro.uol.com.br/',
+                    '2. Vá em Preferências > Integrações',
+                    '3. Gere um novo token',
+                    '4. Atualize PAGBANK_TOKEN no .env'
+                ]
+            });
+        }
+        
         res.status(500).json({
             error: 'Erro ao gerar PIX',
             details: error.response?.data || error.message
