@@ -1,5 +1,3 @@
-// server.js
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -7,27 +5,33 @@ const axios = require('axios');
 const { DOMParser } = require('xmldom');
 
 // Inicializa o servidor
-const app = express(); // ✅ Aqui é onde estava o problema: falta do 'app'
+const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Rota simples pra teste
+// Rota de teste
 app.get('/', (req, res) => {
-    res.json({ status: 'Servidor funcionando!' });
+    res.json({ status: 'Servidor online!' });
 });
 
 // Rota para gerar PIX
 app.post('/api/pix', async (req, res) => {
     const { amount, description, reference, name, email, cpf, phone, street, number, district, city, state, postalCode } = req.body;
 
-    // Validação do amount
+    // Validação inicial
     if (typeof amount !== 'number' || isNaN(amount)) {
         return res.status(400).json({ error: "Campo 'amount' inválido" });
     }
 
+    if (cpf && cpf.replace(/\D/g, '').length !== 11) {
+        return res.status(400).json({ error: "CPF deve ter 11 dígitos" });
+    }
+
     try {
+        const cleanCpf = cpf ? cpf.replace(/\D/g, '') : '12345678900';
+
         const data = new URLSearchParams({
             email: process.env.PAGSEGURO_EMAIL,
             token: process.env.PAGSEGURO_TOKEN,
@@ -41,18 +45,18 @@ app.post('/api/pix', async (req, res) => {
             // Dados do comprador
             sender_name: name || 'João da Silva',
             sender_email: email || 'comprador@example.com',
-            sender_cpf: cpf || '12345678900',
+            sender_cpf: cleanCpf,
             sender_area_code: phone?.slice(0, 2) || '11',
             sender_phone: phone?.slice(2) || '999999999',
 
-            // Endereço de entrega (sempre requerido)
+            // Endereço de entrega
             shippingAddressRequired: 'true',
             shippingAddressStreet: street || 'Rua Principal',
             shippingAddressNumber: number || '123',
             shippingAddressDistrict: district || 'Centro',
             shippingAddressCity: city || 'São Paulo',
             shippingAddressState: state || 'SP',
-            shippingAddressPostalCode: postalCode || '01310000',
+            shippingAddressPostalCode: postalCode?.replace(/\D/g, '') || '01310000',
             shippingAddressCountry: 'BRA',
 
             currency: 'BRL'
@@ -94,10 +98,8 @@ app.post('/api/pix', async (req, res) => {
     }
 });
 
-// Porta do servidor
+// Servidor escutando
 const PORT = process.env.PORT || 3000;
-
-// ✅ Servidor escutando
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });

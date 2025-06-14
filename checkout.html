@@ -430,143 +430,158 @@
     </div>
 
     <!-- Formulário de Compra -->
-    <div class="checkout-form">
-        <h2 class="section-title"><span>📝</span> Finalizar Compra</h2>
-        <form id="checkoutForm">
+<div class="checkout-form">
+    <h2 class="section-title"><span>📝</span> Finalizar Compra</h2>
+    <form id="checkoutForm">
+        <!-- Nome Completo -->
+        <div class="form-group">
+            <label for="fullName">Nome Completo *</label>
+            <input type="text" class="form-control" id="fullName" required>
+        </div>
+
+        <!-- Email e Telefone -->
+        <div class="form-row">
             <div class="form-group">
-                <label for="fullName">Nome Completo *</label>
-                <input type="text" class="form-control" id="fullName" required>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" class="form-control" id="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Telefone *</label>
-                    <input type="tel" class="form-control" id="phone" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cpf">CPF *</label>
-                    <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" required>
-                </div>
-                <div class="form-group">
-                    <label for="birthDate">Data de Nascimento</label>
-                    <input type="date" class="form-control" id="birthDate">
-                </div>
-            </div>
-            <h3 style="color: var(--primary-green); margin: 2rem 0 1rem;">📍 Endereço de Entrega</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="addressCep">CEP *</label>
-                    <input type="text" class="form-control" id="addressCep" placeholder="00000-000" required onblur="searchCEP(this)">
-                </div>
-                <div class="form-group">
-                    <label for="addressState">Estado *</label>
-                    <select class="form-control" id="addressState" required>
-                        <option value="">Selecione</option>
-                        <option value="AC">Acre</option>
-                        <option value="AL">Alagoas</option>
-                        <option value="AP">Amapá</option>
-                        <option value="AM">Amazonas</option>
-                        <option value="BA">Bahia</option>
-                        <option value="CE">Ceará</option>
-                        <option value="DF">Distrito Federal</option>
-                        <option value="ES">Espírito Santo</option>
-                        <option value="GO">Goiás</option>
-                        <option value="MA">Maranhão</option>
-                        <option value="MT">Mato Grosso</option>
-                        <option value="MS">Mato Grosso do Sul</option>
-                        <option value="MG">Minas Gerais</option>
-                        <option value="PA">Pará</option>
-                        <option value="PB">Paraíba</option>
-                        <option value="PR">Paraná</option>
-                        <option value="PE">Pernambuco</option>
-                        <option value="PI">Piauí</option>
-                        <option value="RJ">Rio de Janeiro</option>
-                        <option value="RN">Rio Grande do Norte</option>
-                        <option value="RS">Rio Grande do Sul</option>
-                        <option value="RO">Rondônia</option>
-                        <option value="RR">Roraima</option>
-                        <option value="SC">Santa Catarina</option>
-                        <option value="SP">São Paulo</option>
-                        <option value="SE">Sergipe</option>
-                        <option value="TO">Tocantins</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="city">Cidade *</label>
-                    <input type="text" class="form-control" id="city" required>
-                </div>
-                <div class="form-group">
-                    <label for="neighborhood">Bairro *</label>
-                    <input type="text" class="form-control" id="neighborhood" required>
-                </div>
+                <label for="email">Email *</label>
+                <input type="email" class="form-control" id="email" required>
             </div>
             <div class="form-group">
-                <label for="street">Endereço *</label>
-                <input type="text" class="form-control" id="street" required>
+                <label for="phone">Telefone *</label>
+                <input type="tel" class="form-control" id="phone" placeholder="(11) 99999-9999" required>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="number">Número *</label>
-                    <input type="text" class="form-control" id="number" required>
-                </div>
-                <div class="form-group">
-                    <label for="complement">Complemento</label>
-                    <input type="text" class="form-control" id="complement">
-                </div>
+        </div>
+
+        <!-- CPF e Data de Nascimento -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cpf">CPF *</label>
+                <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" required>
             </div>
-            <h3 style="color: var(--primary-green); margin: 2rem 0 1rem;">💳 Forma de Pagamento</h3>
-            <div class="payment-methods">
-                <label class="payment-method" onclick="selectPayment('pix')">
-                    <input type="radio" name="payment" value="pix">
-                    <span class="payment-icon">🔲</span>
-                    <div><strong>PIX</strong><br><small style="color: #ccc;">Aprovação instantânea</small></div>
-                    <span style="color: var(--success-green); font-weight: bold;">5% OFF</span>
-                </label>
-                <label class="payment-method" onclick="selectPayment('credit')">
-                    <input type="radio" name="payment" value="credit">
-                    <span class="payment-icon">💳</span>
-                    <div><strong>Cartão de Crédito</strong><br><small style="color: #ccc;">Até 12x sem juros</small></div>
-                </label>
-                <label class="payment-method" onclick="selectPayment('boleto')">
-                    <input type="radio" name="payment" value="boleto">
-                    <span class="payment-icon">📄</span>
-                    <div><strong>Boleto Bancário</strong><br><small style="color: #ccc;">Vencimento em 3 dias</small></div>
-                    <span style="color: var(--success-green); font-weight: bold;">3% OFF</span>
-                </label>
+            <div class="form-group">
+                <label for="birthDate">Data de Nascimento</label>
+                <input type="date" class="form-control" id="birthDate">
             </div>
-            <div class="order-summary">
-                <h3 style="color: var(--primary-green); margin-bottom: 1rem;">📊 Resumo do Pedido</h3>
-                <div class="summary-row">
-                    <span>Magic Germinator (<span id="summaryQty">1</span>x)</span>
-                    <span id="summarySubtotal">R$ 199,00</span>
-                </div>
-                <div class="summary-row">
-                    <span>Frete</span>
-                    <span id="summaryShipping">A calcular</span>
-                </div>
-                <div class="summary-row" id="discountRow" style="display: none;">
-                    <span style="color: var(--success-green);">Desconto</span>
-                    <span id="summaryDiscount" style="color: var(--success-green);">-R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span><strong>TOTAL</strong></span>
-                    <span id="summaryTotal"><strong>R$ 199,00</strong></span>
-                </div>
+        </div>
+
+        <!-- CEP e Estado -->
+        <h3 style="color: var(--primary-green); margin: 2rem 0 1rem;">📍 Endereço de Entrega</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addressCep">CEP *</label>
+                <input type="text" class="form-control" id="addressCep" placeholder="00000-000" required onblur="searchCEP(this)">
             </div>
-            <div class="security-info">
-                <span class="security-icon">🛡️</span>
-                <div><strong>Compra Protegida</strong><br>Seus dados estão seguros com criptografia SSL 256 bits</div>
+            <div class="form-group">
+                <label for="addressState">Estado *</label>
+                <select class="form-control" id="addressState" required>
+                    <option value="">Selecione</option>
+                    <option value="AC">Acre</option>
+                    <option value="AL">Alagoas</option>
+                    <option value="AP">Amapá</option>
+                    <option value="AM">Amazonas</option>
+                    <option value="BA">Bahia</option>
+                    <option value="CE">Ceará</option>
+                    <option value="DF">Distrito Federal</option>
+                    <option value="ES">Espírito Santo</option>
+                    <option value="GO">Goiás</option>
+                    <option value="MA">Maranhão</option>
+                    <option value="MT">Mato Grosso</option>
+                    <option value="MS">Mato Grosso do Sul</option>
+                    <option value="MG">Minas Gerais</option>
+                    <option value="PA">Pará</option>
+                    <option value="PB">Paraíba</option>
+                    <option value="PR">Paraná</option>
+                    <option value="PE">Pernambuco</option>
+                    <option value="PI">Piauí</option>
+                    <option value="RJ">Rio de Janeiro</option>
+                    <option value="RN">Rio Grande do Norte</option>
+                    <option value="RS">Rio Grande do Sul</option>
+                    <option value="RO">Rondônia</option>
+                    <option value="RR">Roraima</option>
+                    <option value="SC">Santa Catarina</option>
+                    <option value="SP">São Paulo</option>
+                    <option value="SE">Sergipe</option>
+                    <option value="TO">Tocantins</option>
+                </select>
             </div>
-            <button type="submit" class="btn btn-primary" id="submitBtn">FINALIZAR COMPRA</button>
-        </form>
-    </div>
+        </div>
+
+        <!-- Cidade e Bairro -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="city">Cidade *</label>
+                <input type="text" class="form-control" id="city" required>
+            </div>
+            <div class="form-group">
+                <label for="neighborhood">Bairro *</label>
+                <input type="text" class="form-control" id="neighborhood" required>
+            </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="form-group">
+            <label for="street">Endereço *</label>
+            <input type="text" class="form-control" id="street" required>
+        </div>
+
+        <!-- Número e Complemento -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="number">Número *</label>
+                <input type="text" class="form-control" id="number" required>
+            </div>
+            <div class="form-group">
+                <label for="complement">Complemento</label>
+                <input type="text" class="form-control" id="complement">
+            </div>
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <h3 style="color: var(--primary-green); margin: 2rem 0 1rem;">💳 Forma de Pagamento</h3>
+        <div class="payment-methods">
+            <label class="payment-method" onclick="selectPayment('pix')">
+                <input type="radio" name="payment" value="pix">
+                <span class="payment-icon">🔲</span>
+                <div><strong>PIX</strong><br><small style="color: #ccc;">Aprovação instantânea</small></div>
+                <span style="color: var(--success-green); font-weight: bold;">5% OFF</span>
+            </label>
+            <label class="payment-method" onclick="selectPayment('boleto')">
+                <input type="radio" name="payment" value="boleto">
+                <span class="payment-icon">📄</span>
+                <div><strong>Boleto Bancário</strong><br><small style="color: #ccc;">Vencimento em 3 dias</small></div>
+                <span style="color: var(--success-green); font-weight: bold;">3% OFF</span>
+            </label>
+            <label class="payment-method" onclick="selectPayment('credit')">
+                <input type="radio" name="payment" value="credit">
+                <span class="payment-icon">💳</span>
+                <div><strong>Cartão de Crédito</strong><br><small style="color: #ccc;">Até 12x sem juros</small></div>
+            </label>
+        </div>
+
+        <!-- Resumo do Pedido -->
+        <div class="order-summary">
+            <h3 style="color: var(--primary-green); margin-bottom: 1rem;">📊 Resumo do Pedido</h3>
+            <div class="summary-row">
+                <span>Magic Germinator (<span id="summaryQty">1</span>x)</span>
+                <span id="summarySubtotal">R$ 199,00</span>
+            </div>
+            <div class="summary-row">
+                <span>Frete</span>
+                <span id="summaryShipping">A calcular</span>
+            </div>
+            <div class="summary-row" id="discountRow" style="display: none;">
+                <span style="color: var(--success-green);">Desconto</span>
+                <span id="summaryDiscount" style="color: var(--success-green);">-R$ 0,00</span>
+            </div>
+            <div class="summary-row">
+                <span><strong>TOTAL</strong></span>
+                <span id="summaryTotal"><strong>R$ 199,00</strong></span>
+            </div>
+        </div>
+
+        <!-- Botão de Submissão -->
+        <button type="submit" class="btn btn-primary" id="submitBtn">FINALIZAR COMPRA</button>
+    </form>
+</div>
 
 </div>
 
@@ -578,7 +593,7 @@
     let selectedPayment = '';
     let selectedShippingType = '';
 
-    // Função para calcular frete localmente
+    // Calcula frete por estado
     function calculateFreightByState(state) {
         const freightTable = {
             'SP': 15.00,
@@ -591,9 +606,25 @@
             'PE': 25.00,
             'CE': 24.00,
             'DF': 22.00,
-            'default': 25.00
+            'AM': 35.00,
+            'PA': 35.00,
+            'AC': 40.00,
+            'RO': 40.00,
+            'RR': 45.00,
+            'AP': 45.00,
+            'MA': 30.00,
+            'PI': 30.00,
+            'TO': 30.00,
+            'MT': 28.00,
+            'MS': 26.00,
+            'GO': 24.00,
+            'ES': 20.00,
+            'AL': 25.00,
+            'PB': 25.00,
+            'SE': 24.00,
+            'RN': 24.00
         };
-        return freightTable[state] || freightTable.default;
+        return freightTable[state] || freightTable['default'];
     }
 
     async function calculateShipping() {
@@ -664,74 +695,17 @@
         } else {
             discountRow.style.display = 'none';
         }
+
         document.getElementById('summaryTotal').innerHTML = `<strong>R$ ${total.toFixed(2)}</strong>`;
     }
-
-    async function processPayment() {
-    const subtotal = productPrice * currentQuantity;
-    const total = subtotal + shippingPrice - discount;
-
-    const fullName = document.getElementById('fullName').value.trim();
-    const userEmail = document.getElementById('email').value.trim();
-    const userPhone = document.getElementById('phone').value.replace(/\D/g, '');
-    const userCpf = document.getElementById('cpf').value.replace(/\D/g, '');
-    const cep = document.getElementById('addressCep').value.replace(/\D/g, '');
-    const estado = document.getElementById('state').value || document.getElementById('addressState').value;
-    const cidade = document.getElementById('city').value;
-    const bairro = document.getElementById('neighborhood').value;
-    const endereco = document.getElementById('street').value;
-    const numero = document.getElementById('number').value;
-
-    if (!selectedPayment) {
-        alert("Selecione uma forma de pagamento");
-        return;
-    }
-
-    try {
-        const response = await fetch('https://meu-checkout-backend-1.onrender.com/api/pix',  {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: parseFloat(total.toFixed(2)),
-                description: "Magic Germinator",
-                reference: `pedido_${Date.now()}`,
-                name: fullName,
-                email: userEmail,
-                cpf: userCpf,
-                phone: userPhone,
-                street: endereco,
-                number: numero,
-                district: bairro,
-                city: cidade,
-                state: estado,
-                postalCode: cep
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error("Dados incompletos da API");
-        }
-
-        showPixModal(result);
-
-    } catch (error) {
-        alert("Erro ao gerar PIX: " + error.message);
-        console.error(error);
-    }
-}
 
     function validateForm() {
         const requiredFields = ['fullName', 'email', 'phone', 'cpf', 'addressCep', 'city', 'neighborhood', 'street', 'number'];
         let isValid = true;
+
         requiredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (!field.value.trim()) {
+            if (!field || !field.value.trim()) {
                 field.classList.add('error');
                 isValid = false;
             } else {
@@ -745,7 +719,7 @@
             isValid = false;
         }
 
-        if (shippingPrice === 0) {
+        if (shippingPrice === 0 && selectedShippingType) {
             alert('Selecione uma opção de frete');
             isValid = false;
         }
@@ -753,13 +727,80 @@
         return isValid;
     }
 
+    async function processPayment() {
+        const subtotal = productPrice * currentQuantity;
+        const total = subtotal + shippingPrice - discount;
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const userEmail = document.getElementById('email').value.trim();
+        const userPhone = document.getElementById('phone').value.replace(/\D/g, '');
+        const userCpf = document.getElementById('cpf').value.replace(/\D/g, '');
+        const cep = document.getElementById('addressCep').value.replace(/\D/g, '');
+        const estado = document.getElementById('addressState').value;
+        const cidade = document.getElementById('city').value;
+        const bairro = document.getElementById('neighborhood').value;
+        const endereco = document.getElementById('street').value;
+        const numero = document.getElementById('number').value;
+
+        if (!selectedPayment) {
+            alert("Selecione uma forma de pagamento");
+            return;
+        }
+
+        // Valida se todos os campos estão preenchidos
+        if (!fullName || !userEmail || !userPhone || !userCpf || !endereco || !numero || !bairro || !cidade || !estado || !cep) {
+            alert("Preencha todos os campos obrigatórios");
+            return;
+        }
+
+        try {
+            const response = await fetch('https://meu-checkout-backend-1.onrender.com/api/pix',  {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: parseFloat(total.toFixed(2)),
+                    description: "Magic Germinator",
+                    reference: `pedido_${Date.now()}`,
+                    name: fullName,
+                    email: userEmail,
+                    cpf: userCpf,
+                    phone: userPhone,
+                    street: endereco,
+                    number: numero,
+                    district: bairro,
+                    city: cidade,
+                    state: estado,
+                    postalCode: cep
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error("Dados incompletos da API");
+            }
+
+            showPixModal(result);
+
+        } catch (error) {
+            alert("Erro ao gerar PIX: " + error.message);
+            console.error(error);
+        }
+    }
+
     async function searchCEP(input) {
         const cep = input.value.replace(/\D/g, '');
         if (cep.length !== 8) return;
+
         try {
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`); 
             const data = await response.json();
             if (data.erro) throw new Error('CEP não encontrado');
+
             document.getElementById('street').value = data.logradouro;
             document.getElementById('neighborhood').value = data.bairro;
             document.getElementById('city').value = data.localidade;
@@ -771,19 +812,20 @@
         }
     }
 
-    document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!validateForm()) return;
-
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.textContent = 'Processando...';
-        submitBtn.disabled = true;
-
-        await processPayment();
-
-        submitBtn.textContent = 'FINALIZAR COMPRA';
-        submitBtn.disabled = false;
-    });
+    function populateStates() {
+        const stateSelect = document.getElementById("addressState");
+        const states = [
+            "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+            "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+            "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+        ];
+        states.forEach(state => {
+            const option = document.createElement("option");
+            option.value = state;
+            option.textContent = state;
+            stateSelect.appendChild(option);
+        });
+    }
 
     function showPixModal(response) {
         const modal = document.createElement('div');
@@ -796,11 +838,16 @@
             <div style="background: var(--dark-bg); border: 1px solid var(--primary-green); 
                        border-radius: 20px; padding: 2rem; max-width: 500px; text-align: center;">
                 <h2 style="color: var(--primary-green); margin-bottom: 1rem;">🔲 PIX</h2>
-                <p style="color: #ccc; margin: 1rem 0;">Valor: R$ ${response.total?.toFixed(2) || '---'}</p>
-                <div style="width: 200px; height: 200px; background: white; margin: 0 auto;"></div>
+                <p style="color: #ccc; margin: 1rem 0;">Valor: R$ ${(response.copy_paste?.split(',')[0] || '---')}</p>
+                
+                <!-- Simulação do QR Code -->
+                <div style="width: 200px; height: 200px; margin: 0 auto; background: white;"></div>
+
+                <!-- Código Copia e Cola -->
                 <textarea rows="4" readonly style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 0.9rem;" onclick="this.select(); document.execCommand('copy'); alert('Copiado!')">
-${response.copy_paste || 'Não disponível'}
+${response.copy_paste}
                 </textarea>
+
                 <button onclick="this.parentElement.parentElement.remove()" 
                         style="margin-top: 1rem; background: var(--primary-green); color: #000; border: none; 
                                padding: 1rem 2rem; border-radius: 10px; cursor: pointer;">
@@ -811,7 +858,25 @@ ${response.copy_paste || 'Não disponível'}
         document.body.appendChild(modal);
     }
 
+    // Evento de submit do formulário
+    document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.textContent = 'Processando...';
+        submitBtn.disabled = true;
+
+        await processPayment();
+
+        submitBtn.textContent = 'FINALIZAR COMPRA';
+        submitBtn.disabled = false;
+    });
+
+    // Inicialização
     document.addEventListener('DOMContentLoaded', () => {
+        populateStates();
         updatePricing();
     });
 </script>

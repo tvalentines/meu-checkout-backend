@@ -1,5 +1,5 @@
 {
-  "name": "magic-germinator-backend",
+  "name": "magic-checkout-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
